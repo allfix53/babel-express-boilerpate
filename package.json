@@ -1,5 +1,5 @@
 {
-  "name": "ms-transaction",
+  "name": "fwd-gateway",
   "version": "1.0.0",
   "description": "microservice for transactional data",
   "main": "index.js",

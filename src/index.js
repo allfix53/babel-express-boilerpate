@@ -3,8 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import debug from 'debug';
-import connectDb from './config/datasource';
-import models from './models';
+import api from './api';
 
 const error = debug('app:error');
 const log = debug('app:log');
@@ -16,22 +15,20 @@ app.use(cors());
 app.use(bodyParser.urlencoded({
   extended: true
 }));
-// connect db
-connectDb(
-  (db) => {
-    models(db.sequelize, db.Sequelize, (model) => {
-      model;
-      db.sequelize
-        .sync({ force: true })
-        .then(() => {
-          log('Database scheme synced');
-        }, (err) => {
-          log('An error occurred while creating the table:', err);
-        });
-
-      app.server.listen(process.env.PORT || 8080);
-      log(`Started on port ${app.server.address().port}`);
-    });
-  });
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "localhost");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  if (typeof req.headers.secretkey != 'string' && req.headers.secretkey != 'QZ37R7w@z4vTvqmsUe*!R*@7') {
+    res.status(401)
+    res.json({
+      message: "Not allowed access"
+    })
+  } else {
+    next()
+  }
+})
+app.use('/', api());
+app.server.listen(process.env.PORT || 8080);
+log(`Started on port ${app.server.address().port}`);
 
 export default app;
